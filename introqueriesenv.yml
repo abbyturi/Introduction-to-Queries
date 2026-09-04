@@ -1,0 +1,24 @@
+name: introqueries
+channels:
+  - conda-forge
+  - defaults
+
+dependencies:
+  # Core Python/Jupyter environment
+  - python>=3.10
+  - ipykernel
+
+  # SQL and PostgreSQL connectivity
+  - sqlalchemy==1.4.46
+  - psycopg2
+  - pip
+
+  # Data handling used with query results
+  - pandas>=2.1,<3
+
+  # Jupyter SQL magic
+  - pip:
+      - ipython-sql==0.4.1
+
+# This environment is intentionally minimal.
+# Add course-specific packages here as Introduction-to-Queries evolves.
