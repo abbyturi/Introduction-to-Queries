@@ -1,7 +1,0 @@
-/.quarto/
-/_site/
-*.DS_Store
-Thumbs.db
-.Rhistory
-.Rproj.user/
-.ipynb_checkpoints/
