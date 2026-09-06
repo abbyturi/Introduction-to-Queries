@@ -339,5 +339,5 @@ The lecture materials in this repository have been compiled and organized to ali
 
 ---
 
-**Instructor: Abeba N. Turi (Ph.D.)*  
+*Instructor: Abeba N. Turi (Ph.D.)*  
 *Northeastern University | College of Professional Studies*
