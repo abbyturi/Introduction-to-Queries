@@ -333,7 +333,7 @@ Additional technical references include the official documentation for Neon, DBe
 
 This repository supports **ALY 6420: Introduction to Querying** at Northeastern University.
 
-** Credit is extended to the Northeastern University instructional team of instructors and the lead Instructor Prof. Joe Reilly, who developed and composed the ALY 6420 Canvas course materials. Their course design, learning objectives, instructional sequencing, activities, assessments, and supporting materials provide the academic framework within which these repository resources are organized.
+*Credit is extended to the Northeastern University instructional team of instructors and the lead Instructor Prof. Joe Reilly, who developed and composed the ALY 6420 Canvas course materials. Their course design, learning objectives, instructional sequencing, activities, assessments, and supporting materials provide the academic framework within which these repository resources are organized.*
 
 The lecture materials in this repository have been compiled and organized to align with the course syllabus, Canvas learning objectives, assigned readings, PostgreSQL documentation, and supporting instructional resources. They are intended to complement-not replace-the official Canvas course materials.
 
