@@ -2,8 +2,6 @@
 
 ## A Multi-User Application Case Study
 
-### Lecture Note and Student Reference
-
 ## 1. From SQL Queries to a Multi-User Database System
 
 Learning SQL involves more than knowing how to write `SELECT`, `INSERT`, `UPDATE`, and `DELETE` statements. In a real application, SQL operates within a larger system involving users, application logic, authentication, deployment environments, and persistent storage. A query can be syntactically correct while still producing the wrong result because the wrong database, relationship, record, or application state was used.
@@ -263,64 +261,7 @@ Staging     → Staging DB
 Production  → Production DB
 ```
 
-A controlled pilot may intentionally share a test database with local development, but production should normally remain isolated from development experiments.
-
-Applications commonly determine the database through configuration such as:
-
-```text
-DATABASE_URL
-```
-
-Persistent Database Configuration Across Development Sessions
-
-Shared persistence also depends on the application consistently receiving the correct database configuration when it starts.
-
-A developer may temporarily configure a database connection in a terminal:
-
-export DATABASE_URL='<database-connection-url>'
-
-This works for the current shell session, but the setting may disappear when the terminal is closed. If the application has a local fallback data source, a later session may then display different records even though the database itself is functioning correctly.
-
-The situation can be represented as:
-
-Session 1
-Local Application ──→ Shared Test Database ←── Pilot Application
-                         Same records
-
-Session 2
-Local Application ──→ Local fallback
-Pilot Application ──→ Shared Test Database
-                         Different records
-
-This is a configuration problem rather than a synchronization problem. The applications are no longer using the same source of truth.
-
-For persistent development, database configuration should be loaded through an appropriate environment-management mechanism when a new development session starts. Credentials should remain outside source code and should never be committed to Git.
-
-A useful diagnostic is to verify configuration:
-
-import os
-
-print(bool(os.getenv("DATABASE_URL")))
-
-The connection itself should also be tested independently before debugging application logic.
-
-The general troubleshooting sequence is:
-
-Records differ
-    ↓
-Check database configuration
-    ↓
-Check Python/runtime environment
-    ↓
-Test database connection
-    ↓
-Confirm both applications use the same database
-    ↓
-Then investigate application logic
-
-The key lesson is:
-
-Two applications remain consistent only when they continue to use the same authoritative data source. Persistent configuration is therefore part of reliable database application design.
+A controlled pilot may intentionally share a test database with local development, but production should normally remain isolated from development experiments. Two applications remain consistent only when they continue to use the same authoritative data source. Persistent configuration is therefore part of reliable database application design.
 
 ---
 
@@ -540,7 +481,7 @@ CREATE INDEX idx_workflow_status
 ON workflow_records(status);
 ```
 
-Students can then investigate the execution plan:
+You can then investigate the execution plan:
 
 ```sql
 EXPLAIN ANALYZE
@@ -549,7 +490,7 @@ FROM workflow_records
 WHERE status = 'Pending Review';
 ```
 
-This connects directly with the course material on indexing, `EXPLAIN`, `EXPLAIN ANALYZE`, query plans, and performance.
+Check the course material for more on indexing, `EXPLAIN`, `EXPLAIN ANALYZE`, query plans, and performance.
 
 Indexes should not simply be added everywhere. They consume storage and create additional work during `INSERT`, `UPDATE`, and `DELETE`. Performance decisions should therefore be supported by actual query patterns and execution evidence.
 
@@ -656,8 +597,8 @@ The central lesson is that reliable database work requires more than asking:
 
 > **Does this SQL statement run?**
 
-Students should also ask:
+You should also ask:
 
 > What does one row represent? What is the primary key? What is the source of truth? Could this JOIN multiply rows? Could another user modify the record concurrently? Is this operation transactional? Am I connected to the correct database? Is this synchronization or shared persistence? How can I independently validate the result?
 
-These questions connect the relational foundations, DML, joins, aggregation, JSONB, transactions, performance, and Python/PostgreSQL concepts in the **Introduction to Queries** course to the way databases function inside real multi-user applications.
+These questions connect the relational foundations, DML, joins, aggregation, JSONB, transactions, performance, and Python/PostgreSQL concepts in this course to the way databases function inside real multi-user applications.
