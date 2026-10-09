@@ -1,0 +1,155 @@
+-- Part A: INNER JOIN and LEFT JOIN (questions 1 to 3)
+
+-- Q1
+-- Write a query that returns the first name, last name and full address for every customer in Pagila. Use an INNER JOIN between customer and address on address_id. Include the city name in your result by also joining to the city table.
+
+-- Expected columns: first_name, last_name, address, city
+
+SELECT
+    c.first_name,
+    c.last_name,
+    a.address,
+    ci.city
+FROM customer AS c
+INNER JOIN address AS a
+    ON c.address_id = a.address_id
+INNER JOIN city AS ci
+    ON a.city_id = ci.city_id;
+
+
+-- Q2 LEFT JOIN to find non-matching rows
+-- Write a query that returns the customer_id, first_name, and last_name of every customer who has never made a payment. Use a LEFT JOIN between customer and payment, then filter for rows where the payment side is NULL.
+
+-- Hint: payment.customer_id is the joining column. After writing the LEFT JOIN, add a WHERE clause that checks IS NULL on a column from the payment table.
+
+SELECT
+    c.customer_id,
+    c.first_name,
+    c.last_name
+FROM customer AS c
+LEFT JOIN payment AS p
+    ON c.customer_id = p.customer_id
+WHERE p.customer_id IS NULL;
+
+/*
+Note
+In the standard Pagila dataset, every customer has at least one payment record, so this query will return zero rows. Zero rows is the correct result — it confirms that no customers are missing payment records. Because an INNER JOIN also returns zero rows here (for a different structural reason), verify your query by confirming two things: you are using LEFT JOIN and your WHERE clause filters on a column from the payment table, not the customer table. In your SQL comment, state what zero rows means about data quality in this dataset and what non-zero rows would indicate.
+*/
+
+
+-- Q3 Multi-table JOIN using the film rental chain
+-- Using the film rental chain demonstrated in section 4.4, write a query that returns the title of every film that customer_id 130 has rented, along with the rental_date. The path goes through four tables: customer, rental, inventory and film.
+
+-- Expected columns: first_name, last_name, title, rental_date. Order by rental_date ascending.
+
+/*
+Note
+In Module 5, you will solve this same query using a subquery in the WHERE clause rather than a four-table JOIN chain. Comparing both approaches for readability is a Module 5 lab exercise. Keep your solution here for reference.
+*/
+
+SELECT
+    c.first_name,
+    c.last_name,
+    f.title,
+    r.rental_date
+FROM customer AS c
+INNER JOIN rental AS r
+    ON c.customer_id = r.customer_id
+INNER JOIN inventory AS i
+    ON r.inventory_id = i.inventory_id
+INNER JOIN film AS f
+    ON i.film_id = f.film_id
+WHERE c.customer_id = 130
+ORDER BY r.rental_date ASC;
+
+
+-- Part B: FULL OUTER JOIN and JOIN type selection (questions 4 to 5) 
+
+-- Q4 FULL OUTER JOIN for a data quality check
+-- Write a query using FULL OUTER JOIN between the film and inventory tables on film_id. Retrieve film.film_id and inventory.inventory_id from both sides. Then add a WHERE clause to return only rows where one side is NULL; that is, films with no inventory copies or inventory rows with no corresponding film.
+
+/*
+Note
+Your query may return zero rows. In a well-maintained Pagila database, foreign key constraints are enforced, so orphan rows on either side may not exist. Zero rows is a correct and meaningful result: it tells you the dataset is internally consistent. In your SQL comment, interpret what a zero-row result means for data quality and explain what it would mean if rows did appear.
+
+*/
+-- In a SQL comment beneath your query, explain what a NULL on the film side versus a NULL on the inventory side would indicate about data quality.
+
+SELECT
+    f.film_id,
+    i.inventory_id
+FROM film AS f
+FULL OUTER JOIN inventory AS i
+    ON f.film_id = i.film_id
+WHERE f.film_id IS NULL
+   OR i.inventory_id IS NULL;
+
+-- Q5 JOIN type selection
+-- For each scenario below, state whether you would use INNER JOIN, LEFT JOIN or FULL OUTER JOIN and write one sentence explaining your choice. Answer as an SQL comment.
+
+/*
+1. Find the rental history for customers who have rented at least one film. You do not need customers with no rentals.
+Reason: INNER JOIN returns only customers with matching rental records, which is appropriate because customers with no rentals are not needed.
+2. Generate a list of all actors and any films they have appeared in. Include actors who have never appeared in a film.
+Reason: LEFT JOIN preserves every actor from the actor table while returning matching film information when it exists.
+3. Compare two staff member tables from two stores to find records that exist in one store system but not the other.
+Reason: FULL OUTER JOIN preserves unmatched records from both tables, making it possible to identify staff records that exist in either system but have no corresponding record in the other.
+*/
+
+
+-- Part C: diagnosing errors (question 6: Evaluate an AI-generated query) 
+
+-- Q6
+-- The following query was generated by an AI assistant in response to the prompt: "Show me the title and rental date for every film rental in Pagila."
+
+-- AI-generated query (do not run this as-is)
+SELECT f.title, r.rental_date
+FROM film f, rental r
+WHERE f.film_id > 0
+ORDER BY r.rental_date;
+
+/*
+Do the following in a SQL comment block:
+
+1. Identify the specific error in the query and explain what it produces instead of the intended result.
+The original query does not join the film and rental tables.
+   "FROM film f, rental r" creates a Cartesian product (CROSS JOIN).
+   The condition f.film_id > 0 only filters films; it does not connect a rental to the film that was actually rented.
+
+   As a result, every qualifying film is paired with every rental,
+   producing many incorrect film/rental-date combinations instead of
+   one row for each actual rental.
+2. Explain how you would verify the error by examining the row count.
+I would compare the row count of the incorrect query with the number
+   of rows in the rental table:
+
+   SELECT COUNT(*) FROM rental;
+
+   Because each rental represents one rental transaction, the intended
+   result should have the same number of rows as rental (assuming the
+   referenced inventory and film records exist). The incorrect query
+   instead produces approximately:
+
+       number of qualifying films * number of rentals
+
+   This unusually large row count is evidence of the Cartesian product.
+3. Write a corrected version of the query that returns the intended result. Film and rental are not directly connected; you must trace the foreign key path between them (there is no direct relationship).
+
+Film and rental have no direct relationship. The foreign-key path is:
+
+       rental.inventory_id
+           -> inventory.inventory_id
+       inventory.film_id
+           -> film.film_id
+
+SELECT f.title, r.rental_date
+FROM rental AS r
+JOIN inventory AS i
+    ON r.inventory_id = i.inventory_id
+JOIN film AS f
+    ON i.film_id = f.film_id
+ORDER BY r.rental_date;
+
+4. Briefly describe a professional situation where this type of error, if undetected, could cause a problem.
+An undetected Cartesian product could cause serious problems in a business report or analytics project. For example, a rental-performance report could falsely associate every movie with every rental transaction. This could greatly inflate rental counts and lead managers to make incorrect decisions about film popularity, inventory, revenue, or employee/store performance based on inaccurate data.
+*/
